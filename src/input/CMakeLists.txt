@@ -80,6 +80,12 @@ if (SUPPORTS_WIIMOTE)
 				api/Wiimote/l2cap/L2CapWiimote.cpp
 				api/Wiimote/l2cap/L2CapWiimote.h)
 	endif()
+
+	if (ANDROID)
+		target_sources(CemuInput PRIVATE
+				api/Wiimote/android/AndroidUsbWiimote.cpp
+				api/Wiimote/android/AndroidUsbWiimote.h)
+	endif()
 endif ()
 
 

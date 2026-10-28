@@ -92,6 +92,7 @@ fun ControllerInputSettingsScreen(
     val controllerType by viewModel.controllerType.collectAsState()
     val controls by viewModel.controls.collectAsState()
     val activeController by viewModel.activeController.collectAsState()
+    val realWiimote by viewModel.realWiimote.collectAsState()
 
     var showMapAllInputsDialog by rememberSaveable { mutableStateOf(false) }
     var showControllerSettingsDialog by rememberSaveable { mutableStateOf(false) }
@@ -176,11 +177,17 @@ fun ControllerInputSettingsScreen(
                 controlsMapping = controls,
             )
 
-            EmulatedControllerType.WIIMOTE -> WiimoteControllerInputs(
-                onInputClick = ::onInputClick,
-                onInputLongClick = ::onInputLongClick,
-                controlsMapping = controls,
-            )
+            EmulatedControllerType.WIIMOTE -> {
+                RealWiimoteSelection(
+                    realWiimote = realWiimote,
+                    onRealWiimoteChanged = viewModel::setRealWiimote,
+                )
+                WiimoteControllerInputs(
+                    onInputClick = ::onInputClick,
+                    onInputLongClick = ::onInputLongClick,
+                    controlsMapping = controls,
+                )
+            }
         }
     }
 

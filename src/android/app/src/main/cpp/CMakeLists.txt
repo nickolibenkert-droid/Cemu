@@ -17,6 +17,7 @@ add_library(CemuAndroid SHARED
         NativeLogging.cpp
         NativeSettings.cpp
         NativeSwkbd.cpp
+        NativeWiimote.cpp
         WuaConverter.cpp
 )
 

@@ -12,6 +12,7 @@ import info.cemu.cemu.common.android.inputdevice.hasRumble
 import info.cemu.cemu.common.android.inputdevice.listGameControllers
 import info.cemu.cemu.common.android.inputdevice.toControllerInfo
 import info.cemu.cemu.nativeinterface.NativeInput
+import info.cemu.cemu.nativeinterface.NativeWiimote
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -42,6 +43,9 @@ class ControllersViewModel(val controllerIndex: Int) : ViewModel() {
 
     private val _controllers = MutableStateFlow<List<InputController>>(emptyList())
     val controllers = _controllers.asStateFlow()
+
+    private val _realWiimote = MutableStateFlow(NativeWiimote.NO_WIIMOTE)
+    val realWiimote = _realWiimote.asStateFlow()
 
     private val _buttonToBind = MutableStateFlow<ButtonInfo?>(null)
     val buttonToBind = _buttonToBind.asStateFlow()
@@ -116,9 +120,15 @@ class ControllersViewModel(val controllerIndex: Int) : ViewModel() {
         NativeInput.clearControllerMapping(controllerIndex, buttonId)
     }
 
+    fun setRealWiimote(wiimoteIndex: Int) {
+        NativeWiimote.setRealWiimote(controllerIndex, wiimoteIndex)
+        refreshControllerData()
+    }
+
     private fun refreshControllerData() {
         controllersCount = NativeInput.getControllersCount()
         _controls.value = NativeInput.getControllerMappings(controllerIndex)
+        _realWiimote.value = NativeWiimote.getRealWiimote(controllerIndex)
     }
 
     fun isControllerTypeAllowed(controllerType: Int): Boolean {

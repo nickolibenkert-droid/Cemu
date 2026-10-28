@@ -8,6 +8,9 @@
 #ifdef HAS_BLUEZ
 #include "input/api/Wiimote/l2cap/L2CapWiimote.h"
 #endif
+#ifdef HAS_ANDROID_USB_WIIMOTE
+#include "input/api/Wiimote/android/AndroidUsbWiimote.h"
+#endif
 
 #include <numbers>
 #include <queue>
@@ -163,6 +166,10 @@ void WiimoteControllerProvider::connectionThread()
 #ifdef HAS_BLUEZ
 		const auto& l2capDevices = L2CapWiimote::get_devices();
 		std::ranges::move(l2capDevices, std::back_inserter(devices));
+#endif
+#ifdef HAS_ANDROID_USB_WIIMOTE
+		const auto& androidUsbDevices = AndroidUsbWiimote::get_devices();
+		std::ranges::move(androidUsbDevices, std::back_inserter(devices));
 #endif
 		{
 			std::scoped_lock lock(m_connectedDeviceMutex);

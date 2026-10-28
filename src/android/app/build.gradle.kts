@@ -51,6 +51,7 @@ android {
         versionName = getVersionName()
         versionCode = 1
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["appLabel"] = System.getenv("CEMU_APP_LABEL") ?: "@string/app_name"
     }
 
     androidResources {
@@ -85,6 +86,8 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
+            // lets test builds install next to the regular app
+            System.getenv("CEMU_APPLICATION_ID_SUFFIX")?.let { applicationIdSuffix = it }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

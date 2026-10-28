@@ -2,6 +2,7 @@ package info.cemu.cemu
 
 import android.app.Application
 import info.cemu.cemu.common.android.context.internalFolder
+import info.cemu.cemu.common.android.usb.DolphinBar
 import info.cemu.cemu.common.settings.AppSettingsStore
 import info.cemu.cemu.common.ui.localization.setLanguage
 import info.cemu.cemu.common.ui.localization.setTranslations
@@ -36,6 +37,8 @@ class CemuApplication : Application() {
         initializeTranslations()
 
         initializeCemu()
+
+        DolphinBar.init(this)
 
         saveDataFiles()
     }

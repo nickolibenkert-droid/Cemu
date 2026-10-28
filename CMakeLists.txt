@@ -220,6 +220,12 @@ if (ENABLE_HIDAPI)
 	add_compile_definitions(HAS_HIDAPI)
 endif ()
 
+# Wii Remotes through a Mayflash DolphinBar, opened with Android's USB host API
+if (ANDROID)
+	set(SUPPORTS_WIIMOTE ON)
+	add_compile_definitions(HAS_ANDROID_USB_WIIMOTE)
+endif ()
+
 if(UNIX AND NOT APPLE AND NOT ANDROID)
 	if(ENABLE_FERAL_GAMEMODE)
 		add_compile_definitions(ENABLE_FERAL_GAMEMODE)
