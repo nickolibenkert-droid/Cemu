@@ -751,16 +751,15 @@ void WiimoteControllerProvider::rotate_ir(WiimoteState& wiimote_state)
 
 	const float sin = std::sin(rot);
 	const float cos = std::cos(rot);
-	int i = -1;
 	for (auto& dot : wiimote_state.ir_camera.dots)
 	{
-		i++;
 		if (!dot.visible)
 			continue;
 		// move to center, rotate and move back
 		dot.pos -= 0.5f;
-		dot.pos.x = (dot.pos.x * cos) + (dot.pos.y * (-sin));
-		dot.pos.y = (dot.pos.x * sin) + (dot.pos.y * cos);
+		const auto original = dot.pos;
+		dot.pos.x = (original.x * cos) - (original.y * sin);
+		dot.pos.y = (original.x * sin) + (original.y * cos);
 		dot.pos += 0.5f;
 	}
 }

@@ -113,6 +113,17 @@ bool EmulatedController::has_motion() const
 MotionSample EmulatedController::get_motion_data() const
 {
 	std::shared_lock lock(m_mutex);
+#ifdef HAS_ANDROID_USB_WIIMOTE
+	// A selected real Wii Remote must take priority over the handheld's sensors.
+	if (type() == Type::Wiimote)
+	{
+		for (const auto& controller : m_controllers)
+		{
+			if (controller->api() == InputAPI::Wiimote && controller->use_motion())
+				return controller->get_motion_sample();
+		}
+	}
+#endif
 	for (const auto& controller : m_controllers)
 	{
 		if (controller->use_motion())

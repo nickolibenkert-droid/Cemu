@@ -89,7 +89,14 @@ namespace
 		transfer.wLength = static_cast<uint16>(buffer.size());
 		transfer.timeout = timeoutMs;
 		transfer.data = buffer.data();
-		return ioctl(fd, USBDEVFS_CONTROL, &transfer) >= 0;
+		const int result = ioctl(fd, USBDEVFS_CONTROL, &transfer);
+		if (result == static_cast<int>(buffer.size()))
+			return true;
+		// Empty-slot probes commonly time out; only log failed writes to discovered remotes.
+		if (timeoutMs != kProbeTimeoutMs)
+			cemuLog_log(LogType::Force, "DolphinBar slot {}: report {:#x} write failed ({} of {} bytes, errno {})",
+				interfaceNumber, data[0], result, buffer.size(), result < 0 ? errno : 0);
+		return false;
 	}
 } // namespace
 

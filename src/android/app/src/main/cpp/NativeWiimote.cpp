@@ -76,6 +76,9 @@ Java_info_cemu_cemu_nativeinterface_NativeWiimote_getRealWiimote([[maybe_unused]
 extern "C" [[maybe_unused]] JNIEXPORT void JNICALL
 Java_info_cemu_cemu_nativeinterface_NativeWiimote_setRealWiimote([[maybe_unused]] JNIEnv* env, [[maybe_unused]] jclass clazz, jint index, jint wiimoteIndex)
 {
+	if (wiimoteIndex < NativeWiimote::NO_WIIMOTE || wiimoteIndex >= static_cast<jint>(NativeWiimote::MAX_WIIMOTES))
+		return;
+
 	auto emulatedController = EmulatedControllerManager::GetController(index).GetControllerPtr();
 	if (!emulatedController)
 		return;
@@ -84,13 +87,17 @@ Java_info_cemu_cemu_nativeinterface_NativeWiimote_setRealWiimote([[maybe_unused]
 	for (const auto& controller : controllers)
 	{
 		if (controller->api() == InputAPI::Wiimote)
+		{
+			controller->stop_rumble();
 			emulatedController->remove_controller(controller);
+		}
 	}
 
 	if (wiimoteIndex < 0)
 		return;
 
 	auto wiimote = ControllerFactory::CreateController(InputAPI::Wiimote, fmt::format("{}", wiimoteIndex), "");
+	wiimote->set_rumble(1.0f);
 	emulatedController->clear_mappings();
 	emulatedController->add_controller(wiimote);
 	emulatedController->set_default_mapping(wiimote);

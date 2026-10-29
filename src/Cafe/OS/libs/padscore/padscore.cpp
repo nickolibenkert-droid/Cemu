@@ -61,6 +61,9 @@ namespace padscore
 		struct WPADData
 		{
 			MEMPTR<void> extension_callback;
+#ifdef HAS_ANDROID_USB_WIIMOTE
+			int last_extension_type = -1;
+#endif
 			MEMPTR<void> connectCallback;
 			MEMPTR<void> sampling_callback;
 			MEMPTR<void> dpd_callback;
@@ -732,11 +735,19 @@ namespace padscore
 			{
 				if (const auto controller = instance.get_wpad_controller(i))
 				{
-					if (controller->m_extension_status == WPADController::ConnectCallbackStatus::ReportConnect)
+					const auto deviceType = controller->get_device_type();
+					bool notifyExtension = controller->m_extension_status == WPADController::ConnectCallbackStatus::ReportConnect;
+#ifdef HAS_ANDROID_USB_WIIMOTE
+					// A physical Nunchuk can be attached or removed while the game is running.
+					auto& lastType = g_padscore.controller_data[i].last_extension_type;
+					notifyExtension |= lastType != static_cast<int>(deviceType);
+					lastType = static_cast<int>(deviceType);
+#endif
+					if (notifyExtension)
 					{
 						controller->m_extension_status = WPADController::ConnectCallbackStatus::None;
 						cemuLog_log(LogType::InputAPI, "Calling WPADextensionCallback({})", i);
-						PPCCoreCallback(g_padscore.controller_data[i].extension_callback, i, controller->get_device_type());
+						PPCCoreCallback(g_padscore.controller_data[i].extension_callback, i, deviceType);
 					}
 				}
 			}
