@@ -42,6 +42,31 @@ namespace
 	std::atomic_bool s_running = false;
 	std::vector<std::unique_ptr<Slot>> s_slots;
 
+	bool IsCompleteInputReport(const uint8* data, size_t size)
+	{
+		if (size == 0)
+			return false;
+		// Sizes include the report ID. The shared parser assumes complete HID reports.
+		switch (data[0])
+		{
+		case 0x20: return size >= 7;  // status
+		case 0x21: return size >= 22; // memory read
+		case 0x22: return size >= 5;  // acknowledgement
+		case 0x30: return size >= 3;  // buttons
+		case 0x31: return size >= 6;  // buttons + acceleration
+		case 0x32: return size >= 11; // buttons + extension
+		case 0x33: return size >= 18; // buttons + acceleration + IR
+		case 0x34:
+		case 0x35:
+		case 0x36:
+		case 0x37:
+		case 0x3d:
+		case 0x3e:
+		case 0x3f: return size >= 22;
+		default: return false;
+		}
+	}
+
 	void ReaderThread(int fd, Slot* slot)
 	{
 		SetThreadName("Wiimote-usb");
@@ -56,6 +81,8 @@ namespace
 			const int result = ioctl(fd, USBDEVFS_BULK, &transfer);
 			if (result > 0)
 			{
+				if (!IsCompleteInputReport(buffer.data(), static_cast<size_t>(result)))
+					continue;
 				std::scoped_lock lock(slot->mutex);
 				if (slot->packets.size() >= kMaxQueuedPackets)
 					slot->packets.pop_front();
