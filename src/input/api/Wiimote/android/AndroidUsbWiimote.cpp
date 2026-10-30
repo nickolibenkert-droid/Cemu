@@ -32,6 +32,7 @@ namespace
 		// empty DolphinBar slots never send anything
 		std::atomic_bool hasRemote = false;
 		std::atomic_bool failed = false;
+		uint16 lastButtons = 0;
 
 		std::thread reader;
 	};
@@ -83,6 +84,16 @@ namespace
 			{
 				if (!IsCompleteInputReport(buffer.data(), static_cast<size_t>(result)))
 					continue;
+				// test aid: log button changes so input can be checked without a game
+				if (buffer[0] == 0x20 || buffer[0] == 0x21 || buffer[0] == 0x22 || (buffer[0] >= 0x30 && buffer[0] <= 0x37))
+				{
+					const uint16 buttons = ((buffer[1] << 8) | buffer[2]) & 0x1F9F;
+					if (buttons != slot->lastButtons)
+					{
+						slot->lastButtons = buttons;
+						cemuLog_log(LogType::Force, "DolphinBar slot {}: buttons {:#06x} (report {:#x})", slot->interfaceNumber, buttons, buffer[0]);
+					}
+				}
 				std::scoped_lock lock(slot->mutex);
 				if (slot->packets.size() >= kMaxQueuedPackets)
 					slot->packets.pop_front();
